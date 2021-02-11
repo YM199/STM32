@@ -1,0 +1,887 @@
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE Òº¾§Ê±_Ó3
+OBJECT MODULE PLACED IN Òº¾§Ê±ÖÓ3.OBJ
+COMPILER INVOKED BY: D:\keil\C51\BIN\C51.EXE Òº¾§Ê±ÖÓ3.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include<intrins.h>
+   3          #define uchar unsigned char
+   4          #define uint unsigned int
+   5          
+   6          sbit DQ=P3^7;
+   7          sbit light=P2^0;
+   8          sbit k1=P3^4;
+   9          sbit k2=P3^3;
+  10          sbit k3=P3^2;
+  11          sbit k4=P3^5;
+  12          sbit k5=P3^6;
+  13          sbit LED1=P1^3;
+  14          sbit LED2=P1^4;
+  15          
+  16          sbit DS1302_CE=P1^2;
+  17          sbit DS1302_IO=P1^1;
+  18          sbit DS1302_SCLK=P1^0;
+  19          
+  20          sbit LCD1602_RS=P2^5;
+  21          sbit LCD1602_RW=P2^6;
+  22          sbit LCD1602_EN=P2^7;
+  23          
+  24          extern uchar wendu[4];
+  25          extern void get_wendu();
+  26          
+  27          extern void LCD1602_init();
+  28          extern void LCD1602_wcmd(uchar cmd);
+  29          extern void LCD1602_wdat(uchar dat);
+  30          extern void LCD1602_pos(uchar x,bit y);         //¶¨ÒåÏÔÊ¾Î»ÖÃ£¬xÎªÁÐ£¬yÎªÐÐ£¬0ÉÏ1ÏÂ
+  31          extern void LCD1602_dischar(uchar x,bit y,uchar dat); //ÔÚÖ¸¶¨Î»ÖÃÏÔÊ¾×Ö·û
+  32          extern void LCD1602_prints(uchar x,bit y,uchar *p);  //ÏÔÊ¾×Ö·û´®
+  33          
+  34          extern uchar dt[7];
+  35          extern void set_time();
+  36          extern void get_time();
+  37          extern void DS1302_init();
+  38          
+  39          /**************************DS1302 *********************************/
+  40          
+  41          uchar dt[7];
+  42          
+  43          void DS1302_write_byte(uchar dat)
+  44          {
+  45   1        char i;
+  46   1      
+  47   1        for(i=0;i<8;i++)
+  48   1        {
+  49   2          DS1302_SCLK = 0;
+  50   2              _nop_();
+  51   2              _nop_();
+  52   2              dat >>= 1;
+  53   2              DS1302_IO = CY;
+  54   2              DS1302_SCLK=1;
+  55   2              _nop_();
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 2   
+
+  56   2              _nop_();
+  57   2        }
+  58   1      }
+  59          
+  60          uchar DS1302_read_byte()
+  61          {
+  62   1        uchar i;
+  63   1        uchar dat = 0;
+  64   1        for(i=0;i<8;i++)
+  65   1        {
+  66   2          DS1302_SCLK = 0;
+  67   2              _nop_();
+  68   2              _nop_();
+  69   2              dat >>= 1;
+  70   2              if(DS1302_IO) dat |= 0x80;
+  71   2              DS1302_SCLK =1;
+  72   2              _nop_();
+  73   2              _nop_();
+  74   2        }
+  75   1        return dat;
+  76   1      }
+  77          
+  78          
+  79          void DS1302_write(uchar address,uchar dat)
+  80          {
+  81   1        DS1302_CE=0;
+  82   1        _nop_();
+  83   1        _nop_();
+  84   1        DS1302_SCLK=0;
+  85   1        _nop_();
+  86   1        _nop_();
+  87   1        DS1302_CE=1;
+  88   1        _nop_();
+  89   1        _nop_();
+  90   1        DS1302_write_byte(address);
+  91   1        DS1302_write_byte(dat);
+  92   1        DS1302_SCLK=1;
+  93   1        DS1302_CE=0;
+  94   1      }
+  95          
+  96          
+  97          uchar DS1302_read(uchar address)
+  98          {
+  99   1        uchar dat;
+ 100   1        DS1302_CE=0;
+ 101   1        _nop_();
+ 102   1        _nop_();                                         
+ 103   1        DS1302_SCLK=0;
+ 104   1        _nop_();
+ 105   1        _nop_();
+ 106   1        DS1302_CE=1;
+ 107   1        _nop_();
+ 108   1        _nop_();
+ 109   1        DS1302_write_byte(address);
+ 110   1        dat =DS1302_read_byte();
+ 111   1        DS1302_SCLK=1;
+ 112   1        DS1302_CE=0;
+ 113   1        dat=dat/16*10+dat%16;
+ 114   1        return dat;
+ 115   1      }
+ 116          
+ 117          void DS1302_init()
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 3   
+
+ 118          {
+ 119   1        DS1302_write(0x8e,0x00);
+ 120   1        DS1302_write(0x80,0x00);
+ 121   1        DS1302_write(0x82,0x00);
+ 122   1        DS1302_write(0x84,0x12);
+ 123   1        DS1302_write(0x86,0x10);
+ 124   1        DS1302_write(0x88,0x11);
+ 125   1        DS1302_write(0x8a,0x06);
+ 126   1        DS1302_write(0x8c,0x12);
+ 127   1        DS1302_write(0x8e,0x80);
+ 128   1      }
+ 129          
+ 130          void set_time()
+ 131          {
+ 132   1        uchar i,j=0x80;
+ 133   1        for(i=0;i<7;i++)
+ 134   1        {
+ 135   2          dt[i]=dt[i]/10*16+dt[i]%10;
+ 136   2        }
+ 137   1        DS1302_write(0x8e,0x00);
+ 138   1        DS1302_write(0x80,0x00);
+ 139   1        for(i=0;i<7;i++)
+ 140   1        {
+ 141   2          DS1302_write(j,dt[i]);
+ 142   2          j+=2;
+ 143   2        }
+ 144   1        DS1302_write(0x8e,0x80);
+ 145   1      }
+ 146          
+ 147          void get_time()
+ 148          {
+ 149   1        dt[0] =DS1302_read(0x81);              //¶Á1302Ê±¼ä£¬Ãë
+ 150   1        dt[1] =DS1302_read(0x83);              //·Ö
+ 151   1        dt[2] =DS1302_read(0x85);              //Ê±
+ 152   1        dt[3] =DS1302_read(0x87);              //ÈÕ
+ 153   1        dt[4] =DS1302_read(0x89);              //ÔÂ
+ 154   1        dt[5] =DS1302_read(0x8b);              //£¿ÖÜ
+ 155   1        dt[6] =DS1302_read(0x8d);              //Äê
+ 156   1      }
+ 157          
+ 158          void chaongdiaon()                                   //³äµç
+ 159          {
+ 160   1      DS1302_write(0x8e,0x00);           /* ¿ØÖÆÃüÁî,WP=0,½â³ýÐ´±£»¤*/
+ 161   1        _nop_();
+ 162   1        _nop_();
+ 163   1      DS1302_write(0x90, 0xa6);    //Ê¹ÄÜ³äµç   ÓÃÒ»¸ö¶þ¼«¹Ü  ÓÃ4kµç×è
+ 164   1      DS1302_write(0x8e,0x80);           /* ¿ØÖÆÃüÁî,WP=1,Ð´±£»¤*/
+ 165   1        _nop_();
+ 166   1        _nop_();
+ 167   1      }
+ 168          /*********************************   LCD  1602      ******************/
+ 169          uchar code self_char[]={
+ 170                                                          0x08,0x0f,0x12,0x0f,0x0a,0x1f,0x02,0x02, //Äê
+ 171                                                          0x0f,0x09,0x0f,0x09,0x0f,0x09,0x13,0x01, //ÔÂ
+ 172                                                          0x0f,0x09,0x09,0x0f,0x09,0x09,0x0f,0x00, //ÈÕ
+ 173                                                          0x18,0x18,0x07,0x08,0x08,0x08,0x07,0x00, //ÎÂ¶È±êÖ¾¡ª ¡ªÉã
+             -ÊÏ¶È
+ 174                                                          0x00,0x04,0x0E,0x1F,0x0E,0x04,0x00,0x00, //·ûºÅ¡ô
+ 175                                                          0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, //È«¿ª
+ 176                                                          0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //
+ 177                                                          0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00         //
+ 178                                                     };
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 4   
+
+ 179          
+ 180          bit lcd_busy()
+ 181          {
+ 182   1        bit result;
+ 183   1        LCD1602_RS=0;
+ 184   1        LCD1602_RW=1;
+ 185   1        LCD1602_EN=1;
+ 186   1        _nop_();
+ 187   1        _nop_();
+ 188   1        _nop_();
+ 189   1        _nop_();
+ 190   1        result = (bit)(P0&0x80);
+ 191   1        LCD1602_EN=0;
+ 192   1        return(result);
+ 193   1      }
+ 194          
+ 195          void LCD1602_wcmd(uchar cmd)
+ 196          {
+ 197   1        while(lcd_busy());
+ 198   1        LCD1602_RS=0;
+ 199   1        LCD1602_RW=0;
+ 200   1        _nop_();
+ 201   1        _nop_();
+ 202   1        LCD1602_EN=1;
+ 203   1        _nop_();
+ 204   1        _nop_();
+ 205   1        _nop_();
+ 206   1        _nop_();
+ 207   1        P0=cmd;
+ 208   1        _nop_();
+ 209   1        _nop_();
+ 210   1        _nop_();
+ 211   1        _nop_();
+ 212   1        LCD1602_EN=0;
+ 213   1      }
+ 214          
+ 215          void LCD1602_wdat(uchar dat)
+ 216          {
+ 217   1        while(lcd_busy());
+ 218   1        LCD1602_RS=1;
+ 219   1        LCD1602_RW=0;
+ 220   1        LCD1602_EN=1;
+ 221   1        _nop_();
+ 222   1        _nop_();
+ 223   1        _nop_();
+ 224   1        _nop_();
+ 225   1        P0=dat;
+ 226   1        _nop_();
+ 227   1        _nop_();
+ 228   1        _nop_();
+ 229   1        _nop_();
+ 230   1        LCD1602_EN=0;
+ 231   1      }
+ 232          
+ 233          void LCD1602_pos(uchar x,bit y)                //Ö¸¶¨×ø±ê,xÎªÁÐ£¬0~15£¬yÎªÐÐ£¬0ÎªµÚÒ»ÐÐ£¬1ÎªµÚ¶þÐÐ¡£
+ 234          {
+ 235   1        if(y)LCD1602_wcmd(x|0xc0);
+ 236   1        else LCD1602_wcmd(x|0x80);
+ 237   1      }
+ 238          
+ 239          void LCD1602_dischar(uchar x,bit y,uchar dat)        //Ö¸¶¨Î»ÖÃÏÔÊ¾Ò»¸ö×Ö·û
+ 240          {
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 5   
+
+ 241   1        LCD1602_pos(x,y);
+ 242   1        LCD1602_wdat(dat);
+ 243   1      }
+ 244          
+ 245          void LCD1602_prints(uchar x,bit y,uchar *p)                                        //Ö¸¶¨Î»ÖÃÏÔÊ¾×Ö·û´®
+ 246          {
+ 247   1        LCD1602_pos(x,y);
+ 248   1        while((*p) != '\0') {LCD1602_wdat(*p);p++;}
+ 249   1      }
+ 250          
+ 251          void LCD1602_init()
+ 252          {
+ 253   1        uchar i;
+ 254   1        LCD1602_wcmd(0x40);
+ 255   1        for(i=0;i<64;i++)
+ 256   1              {
+ 257   2                LCD1602_wdat(self_char[i]);
+ 258   2              }
+ 259   1        LCD1602_wcmd(0x38);
+ 260   1        LCD1602_wcmd(0x38);
+ 261   1        LCD1602_wcmd(0x0c);
+ 262   1        LCD1602_wcmd(0x06);
+ 263   1        LCD1602_wcmd(0x01);
+ 264   1      }
+ 265          /****************************   18B20   ************************************/
+ 266          uchar wendu[4];
+ 267          
+ 268          void delay_18b20(uchar i)
+ 269          {
+ 270   1        int j;
+ 271   1        for(j=0;j<i;j++);
+ 272   1      }
+ 273          
+ 274          uchar init_18b20()
+ 275          {
+ 276   1        uchar i;
+ 277   1        DQ=0;
+ 278   1        delay_18b20(30);
+ 279   1        DQ=1;
+ 280   1        delay_18b20(3);
+ 281   1        i=DQ;
+ 282   1        delay_18b20(20);
+ 283   1        return(i);
+ 284   1      }
+ 285          
+ 286          uchar read_18b20_bit()
+ 287          {
+ 288   1        uchar i;
+ 289   1        DQ=0;
+ 290   1        DQ=1;
+ 291   1        for(i=0;i<3;i++);
+ 292   1        return(DQ);
+ 293   1      }
+ 294          
+ 295          void write_18b20_bit(unsigned xbit)
+ 296          {
+ 297   1        DQ=0;
+ 298   1        if(xbit==1)
+ 299   1        DQ=1;
+ 300   1        delay_18b20(5);
+ 301   1        DQ=1;
+ 302   1      }
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 6   
+
+ 303          
+ 304          uchar read_18b20_byte()
+ 305          {
+ 306   1        uchar i,j,value;
+ 307   1        j=1;
+ 308   1        value=0;
+ 309   1        for(i=0;i<8;i++)
+ 310   1        {
+ 311   2              if(read_18b20_bit())
+ 312   2              {
+ 313   3                value=value+(j<<i);
+ 314   3              }
+ 315   2              delay_18b20(6);
+ 316   2        }
+ 317   1        return(value);
+ 318   1      }
+ 319          
+ 320          void write_18b20_byte(uchar x)
+ 321          {
+ 322   1        uchar i,j;
+ 323   1        for(i=0;i<8;i++)
+ 324   1        {
+ 325   2              j=x>>i;
+ 326   2              j=j&0x01;
+ 327   2              write_18b20_bit(j);
+ 328   2              delay_18b20(5);
+ 329   2        }
+ 330   1      }
+ 331          
+ 332          void get_wendu()
+ 333          {
+ 334   1        uchar a,b;
+ 335   1        float get_temp;
+ 336   1        int temp1,temp2;
+ 337   1        init_18b20();
+ 338   1        write_18b20_byte(0xcc);
+ 339   1        write_18b20_byte(0x44);
+ 340   1        init_18b20();
+ 341   1        write_18b20_byte(0xcc);
+ 342   1        write_18b20_byte(0xbe);
+ 343   1        a=read_18b20_byte();         //µÍ8Î»
+ 344   1        b=read_18b20_byte();         //¸ß8Î»
+ 345   1        temp1=b;
+ 346   1        temp1=temp1<<8;
+ 347   1        temp1=temp1|a;
+ 348   1        if(b&0xfc)
+ 349   1              {wendu[0]=1;temp1=~temp1+1;}                //0Õý1¸º
+ 350   1        else 
+ 351   1          wendu[0]=0;
+ 352   1        get_temp=temp1*0.0625;
+ 353   1        temp2=get_temp*10+0.5;
+ 354   1        wendu[1]=temp2%1000/100;
+ 355   1        wendu[2]=temp2%1000%100/10;
+ 356   1        wendu[3]=temp2%1000%100%10;
+ 357   1      }
+ 358          
+ 359          
+ 360          /*******************************          Ö÷³ÌÐò         ***************/
+ 361          
+ 362           uchar mode=0,OK=0;
+ 363          uchar dis1[16],dis2[16];
+ 364          //uchar IRCOM[7],IRCODE=0;
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 7   
+
+ 365          uchar NUM1,NUM2;
+ 366          uchar count;
+ 367          bit L=0,select=0,DIS_EN=1,SHAN;
+ 368          
+ 369          void delay(uint i)
+ 370          {
+ 371   1        uchar j;
+ 372   1        while(i-- !=0)
+ 373   1        {
+ 374   2          for(j=0;j<120;j++);
+ 375   2        }
+ 376   1      }
+ 377          
+ 378          void delay1(uchar i)
+ 379          {
+ 380   1        uchar j;
+ 381   1        while(i--)
+ 382   1        {for(j=0;j<13;j++){}}
+ 383   1      }
+ 384          
+ 385          
+ 386          void get_dis()
+ 387          {
+ 388   1        dis1[0]='2';
+ 389   1        dis1[1]='0';
+ 390   1        dis1[2]=0x30+dt[6]/10;
+ 391   1        dis1[3]=0x30+dt[6]%10;
+ 392   1        dis1[4]='-';          //2
+ 393   1        dis1[5]=0x30+dt[4]/10;
+ 394   1        dis1[6]=0x30+dt[4]%10;
+ 395   1        dis1[7]='-';          //1
+ 396   1        dis1[8]=0x30+dt[3]/10;
+ 397   1        dis1[9]=0x30+dt[3]%10;
+ 398   1        dis1[10]=' ';     //2
+ 399   1        dis1[11]=' ';
+ 400   1        dis1[12]=' ';
+ 401   1        switch(dt[5])
+ 402   1        {
+ 403   2              case 1: {
+ 404   3                                dis1[13]='M';
+ 405   3                                dis1[14]='o';
+ 406   3                                dis1[15]='n';
+ 407   3                              }
+ 408   2                              break;
+ 409   2              case 2: {
+ 410   3                                dis1[13]='T';
+ 411   3                                dis1[14]='u';
+ 412   3                                dis1[15]='e';
+ 413   3                              }
+ 414   2                              break;
+ 415   2              case 3: {
+ 416   3                                dis1[13]='W';
+ 417   3                                dis1[14]='e';
+ 418   3                                dis1[15]='d';
+ 419   3                              }
+ 420   2                              break;
+ 421   2              case 4: {
+ 422   3                                dis1[13]='T';
+ 423   3                                dis1[14]='h';
+ 424   3                                dis1[15]='u';
+ 425   3                              }
+ 426   2                              break;
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 8   
+
+ 427   2              case 5: {
+ 428   3                                dis1[13]='F';
+ 429   3                                dis1[14]='r';
+ 430   3                                dis1[15]='i';
+ 431   3                              }
+ 432   2                              break;
+ 433   2              case 6: {
+ 434   3                                dis1[13]='S';
+ 435   3                                dis1[14]='a';
+ 436   3                                dis1[15]='t';
+ 437   3                              }
+ 438   2                              break;
+ 439   2              case 7: {
+ 440   3                                dis1[13]='S';
+ 441   3                                dis1[14]='u';
+ 442   3                                dis1[15]='n';
+ 443   3                              }
+ 444   2                              break;
+ 445   2        }
+ 446   1        dis2[0]=' ';
+ 447   1        dis2[1]=0x30+dt[2]/10;
+ 448   1        dis2[2]=0x30+dt[2]%10;
+ 449   1        dis2[3]=':';                     //;:
+ 450   1        dis2[4]=0x30+dt[1]/10;
+ 451   1        dis2[5]=0x30+dt[1]%10;
+ 452   1        dis2[6]=':';
+ 453   1        dis2[7]=0x30+dt[0]/10;
+ 454   1        dis2[8]=0x30+dt[0]%10;
+ 455   1        dis2[9]=' ';
+ 456   1        if(wendu[0]==1)
+ 457   1              dis2[10]=0x2d;
+ 458   1        else
+ 459   1              dis2[10]=' ';
+ 460   1        dis2[11]=0x30+wendu[1];
+ 461   1        dis2[12]=0x30+wendu[2];
+ 462   1        dis2[13]='.';
+ 463   1        dis2[14]=0x30+wendu[3];
+ 464   1        dis2[15]=3;
+ 465   1      }
+ 466          
+ 467          void keyscan()
+ 468          {
+ 469   1        if(k1==0)
+ 470   1        {
+ 471   2              delay(10);
+ 472   2              if(k1==0)
+ 473   2              {
+ 474   3                 while(!k1);
+ 475   3      
+ 476   3                mode++;
+ 477   3                if(mode==1 && OK==0)
+ 478   3                      LCD1602_wcmd(0x01);         
+ 479   3                if(mode==2 && OK==0)        
+ 480   3                {
+ 481   4                      mode=0;
+ 482   4                      select=0;
+ 483   4                }
+ 484   3                if(select==0 && OK==1)
+ 485   3                {
+ 486   4                      if(mode==7)
+ 487   4                        mode=1;
+ 488   4                }
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 9   
+
+ 489   3                if(select==1 && OK==1)
+ 490   3                {
+ 491   4                      if(mode==6)
+ 492   4                        mode=1;
+ 493   4                }
+ 494   3      
+ 495   3              }
+ 496   2        }
+ 497   1       if(k2==0)
+ 498   1        {
+ 499   2              delay(10);
+ 500   2              if(k2==0)
+ 501   2              {
+ 502   3                while(!k2);
+ 503   3                if(mode==1 && OK==0)
+ 504   3                  {select=~select;LCD1602_wcmd(0x01);}
+ 505   3                NUM1++;
+ 506   3      
+ 507   3              }
+ 508   2        }
+ 509   1        if(k3==0)
+ 510   1        {
+ 511   2              delay(10);
+ 512   2              if(k3==0)
+ 513   2              {
+ 514   3                while(!k3);
+ 515   3                if(mode==1 && OK==0)
+ 516   3                  {select=~select;LCD1602_wcmd(0x01);}
+ 517   3                NUM2++;
+ 518   3      
+ 519   3              }
+ 520   2        }
+ 521   1        if(k4==0)
+ 522   1        {
+ 523   2              delay(10);
+ 524   2              if(k4==0)
+ 525   2              {
+ 526   3                while(!k4);
+ 527   3                if(mode==0)
+ 528   3                      light=~light;
+ 529   3                if(mode !=0)
+ 530   3                {
+ 531   4                  LCD1602_wcmd(0x01);
+ 532   4                      OK++;
+ 533   4                      NUM1=0;
+ 534   4                      NUM2=0;
+ 535   4                      if(OK==2)
+ 536   4                      {
+ 537   5                        LCD1602_wcmd(0x01);
+ 538   5      
+ 539   5                        set_time();
+ 540   5      //                  set_alarm();
+ 541   5                        mode=0;
+ 542   5                        select=0;
+ 543   5                        OK=0;
+ 544   5                      }
+ 545   4                }
+ 546   3      
+ 547   3              }
+ 548   2        }
+ 549   1        if(k5==0)
+ 550   1        {
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 10  
+
+ 551   2              delay(100);
+ 552   2              if(k5==0)
+ 553   2              {
+ 554   3                while(!k5);
+ 555   3                DS1302_init();
+ 556   3      
+ 557   3              }
+ 558   2        }        
+ 559   1      }        
+ 560          
+ 561          
+ 562          
+ 563          
+ 564          
+ 565          void display()
+ 566          {
+ 567   1        get_wendu();
+ 568   1        get_dis();
+ 569   1      /*  if(alarm[0]==1)
+ 570   1              {LED2=1;}  */
+ 571   1      
+ 572   1        if(mode==0)        //Õý³£Ä£Ê½                                         
+ 573   1        {
+ 574   2              uchar i;
+ 575   2              LED1=1;
+ 576   2              get_time();
+ 577   2      //        get_alarm();
+ 578   2              LCD1602_pos(0,0);
+ 579   2              for(i=0;i<16;i++)
+ 580   2                LCD1602_wdat(dis1[i]);
+ 581   2              LCD1602_pos(0,1);
+ 582   2              for(i=0;i<16;i++)
+ 583   2                LCD1602_wdat(dis2[i]);
+ 584   2        }
+ 585   1      
+ 586   1        if(mode==1&&OK==0)  //²Ëµ¥Ä£Ê½
+ 587   1        {
+ 588   2              LCD1602_prints(1,0,"1.Set Time");
+ 589   2              LCD1602_prints(1,1,"2.About...");
+ 590   2              if(select)
+ 591   2                LCD1602_dischar(0,1,4);
+ 592   2              else
+ 593   2                LCD1602_dischar(0,0,4);
+ 594   2        }
+ 595   1      
+ 596   1        if(OK==1&&select==0)          //µ÷ÈÕÆÚÄ£Ê½
+ 597   1        {
+ 598   2              uchar i;
+ 599   2              LCD1602_pos(0,0);
+ 600   2              for(i=0;i<16;i++)
+ 601   2                LCD1602_wdat(dis1[i]);
+ 602   2              LCD1602_pos(0,1);
+ 603   2              for(i=0;i<10;i++)
+ 604   2                LCD1602_wdat(dis2[i]);
+ 605   2              LCD1602_prints(10,1,"Set...");
+ 606   2              if(SHAN==1) LCD1602_prints(10,1,"Set.  ");
+ 607   2      
+ 608   2              if(mode==1)                  //µ÷·ÖÄ£Ê½£¬ÃëÎ»ÇåÁã
+ 609   2              {
+ 610   3                dt[0]=0;
+ 611   3                LCD1602_dischar(7,1,0x30+dt[0]/10);
+ 612   3                LCD1602_dischar(8,1,0x30+dt[0]%10);
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 11  
+
+ 613   3                if(NUM1!=0)
+ 614   3                      {
+ 615   4                        dt[1]++;
+ 616   4                        if(dt[1]==60)
+ 617   4                              dt[1]=0;
+ 618   4                        LCD1602_dischar(4,1,0x30+dt[1]/10);
+ 619   4                        LCD1602_dischar(5,1,0x30+dt[1]%10);
+ 620   4                        NUM1=0;
+ 621   4                      }
+ 622   3                      if(NUM2!=0)
+ 623   3                      {
+ 624   4                        dt[1]--;
+ 625   4                        if(dt[1]==-1)
+ 626   4                              dt[1]=59;
+ 627   4                        LCD1602_dischar(4,1,0x30+dt[1]/10);
+ 628   4                        LCD1602_dischar(5,1,0x30+dt[1]%10);
+ 629   4                        NUM2=0;
+ 630   4                      }
+ 631   3                      if(SHAN==1) LCD1602_dischar(5,1,5);
+ 632   3                      
+ 633   3              }
+ 634   2                else
+ 635   2      
+ 636   2                 if(mode==2)         //µ÷Ê±Ä£Ê½
+ 637   2                 {
+ 638   3                          if(NUM1!=0)
+ 639   3                       {
+ 640   4                         dt[2]++;
+ 641   4                         if(dt[2]==24)
+ 642   4                               dt[2]=0;
+ 643   4                         LCD1602_dischar(1,1,0x30+dt[2]/10);
+ 644   4                         LCD1602_dischar(2,1,0x30+dt[2]%10);
+ 645   4                         NUM1=0;
+ 646   4                       }
+ 647   3                       if(NUM2!=0)
+ 648   3                       {
+ 649   4                         dt[2]--;
+ 650   4                         if(dt[2]==-1)
+ 651   4                               dt[2]=23;
+ 652   4                         LCD1602_dischar(1,1,0x30+dt[2]/10);
+ 653   4                         LCD1602_dischar(2,1,0x30+dt[2]%10);
+ 654   4                         NUM2=0;
+ 655   4                       }
+ 656   3                        if(SHAN==1) LCD1602_dischar(2,1,5);
+ 657   3                  }
+ 658   2                      if(mode==3)        //µ÷ÐÇÆÚ×´Ì¬
+ 659   2                 {
+ 660   3                          if(NUM1!=0)
+ 661   3                       {
+ 662   4                         dt[5]++;
+ 663   4                         if(dt[5]==8)
+ 664   4                               dt[5]=1;
+ 665   4                         switch(dt[5])
+ 666   4                         {
+ 667   5                                  case 1: LCD1602_prints(13,0,"Mon");break;
+ 668   5                               case 2: LCD1602_prints(13,0,"Tue");break;
+ 669   5                               case 3: LCD1602_prints(13,0,"Wed");break;
+ 670   5                               case 4: LCD1602_prints(13,0,"Thu");break;
+ 671   5                               case 5: LCD1602_prints(13,0,"Fri");break;
+ 672   5                               case 6: LCD1602_prints(13,0,"Sat");break;
+ 673   5                               case 7: LCD1602_prints(13,0,"Sun");break;
+ 674   5                         }
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 12  
+
+ 675   4                         NUM1=0;
+ 676   4                       }
+ 677   3                       if(NUM2!=0)
+ 678   3                       {
+ 679   4                         dt[5]--;
+ 680   4                         if(dt[5]==0)
+ 681   4                               dt[5]=7;
+ 682   4                         switch(dt[5])
+ 683   4                         {
+ 684   5                                  case 1: LCD1602_prints(13,0,"Mon");break;
+ 685   5                               case 2: LCD1602_prints(13,0,"Tue");break;
+ 686   5                               case 3: LCD1602_prints(13,0,"Wed");break;
+ 687   5                               case 4: LCD1602_prints(13,0,"Thu");break;
+ 688   5                               case 5: LCD1602_prints(13,0,"Fri");break;
+ 689   5                               case 6: LCD1602_prints(13,0,"Sat");break;
+ 690   5                               case 7: LCD1602_prints(13,0,"Sun");break;
+ 691   5                         }
+ 692   4                         NUM2=0;
+ 693   4                       }
+ 694   3                        if(SHAN==1) LCD1602_dischar(15,0,5);
+ 695   3                  }
+ 696   2                      if(mode==4)          //µ÷ÈÕÄ£Ê½
+ 697   2                 {
+ 698   3                          if(NUM1!=0)
+ 699   3                       {
+ 700   4                         dt[3]++;
+ 701   4                         if(dt[3]==32)
+ 702   4                               dt[3]=1;
+ 703   4                         LCD1602_dischar(8,0,0x30+dt[3]/10);
+ 704   4                         LCD1602_dischar(9,0,0x30+dt[3]%10);
+ 705   4                         NUM1=0;
+ 706   4                       }
+ 707   3                       if(NUM2!=0)
+ 708   3                       {
+ 709   4                         dt[3]--;
+ 710   4                         if(dt[3]==0)
+ 711   4                               dt[3]=31;
+ 712   4                         LCD1602_dischar(8,0,0x30+dt[3]/10);
+ 713   4                         LCD1602_dischar(9,0,0x30+dt[3]%10);
+ 714   4                         NUM2=0;
+ 715   4                       }
+ 716   3                        if(SHAN==1) LCD1602_dischar(9,0,5);
+ 717   3                  }
+ 718   2                      if(mode==5)                //µ÷ÔÂÄ£Ê½
+ 719   2                 {
+ 720   3                          if(NUM1!=0)
+ 721   3                       {
+ 722   4                         dt[4]++;
+ 723   4                         if(dt[4]==13)
+ 724   4                               dt[4]=1;
+ 725   4                         LCD1602_dischar(5,0,0x30+dt[4]/10);
+ 726   4                         LCD1602_dischar(6,0,0x30+dt[4]%10);
+ 727   4                         NUM1=0;
+ 728   4                       }
+ 729   3                       if(NUM2!=0)
+ 730   3                       {
+ 731   4                         dt[4]--;
+ 732   4                         if(dt[4]==0)
+ 733   4                               dt[4]=12;
+ 734   4                         LCD1602_dischar(5,0,0x30+dt[4]/10);
+ 735   4                         LCD1602_dischar(6,0,0x30+dt[4]%10);
+ 736   4                         NUM2=0;
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 13  
+
+ 737   4                       }
+ 738   3                        if(SHAN==1) LCD1602_dischar(6,0,5);
+ 739   3                  }
+ 740   2                      if(mode==6)          //µ÷ÄêÄ£Ê½
+ 741   2                 {
+ 742   3                          if(NUM1!=0)
+ 743   3                       {
+ 744   4                         dt[6]++;
+ 745   4                         if(dt[6]==100)
+ 746   4                               dt[6]=0;
+ 747   4                         LCD1602_dischar(2,0,0x30+dt[6]/10);
+ 748   4                         LCD1602_dischar(3,0,0x30+dt[6]%10);
+ 749   4                         NUM1=0;
+ 750   4                       }
+ 751   3                       if(NUM2!=0)
+ 752   3                       {
+ 753   4                         dt[6]--;
+ 754   4                         if(dt[6]==-1)
+ 755   4                               dt[6]=99;
+ 756   4                         LCD1602_dischar(2,0,0x30+dt[6]/10);
+ 757   4                         LCD1602_dischar(3,0,0x30+dt[6]%10);
+ 758   4                         NUM2=0;
+ 759   4                       }
+ 760   3                        if(SHAN==1) LCD1602_dischar(3,0,5);
+ 761   3                  }
+ 762   2        }
+ 763   1      
+ 764   1        if(OK==1&&select==1)        //µ÷ÄÖÁåÄ£Ê½
+ 765   1        {
+ 766   2      
+ 767   2      
+ 768   2                LCD1602_prints(0,0," Birthday gift  ");
+ 769   2                LCD1602_prints(0,1,"        --by HJL");
+ 770   2      
+ 771   2                delay(2000);
+ 772   2                LCD1602_wcmd(0x01);
+ 773   2                LCD1602_prints(0,0,"2013-12-04 Is   ");
+ 774   2                LCD1602_prints(0,1,"LiYunL birthday!");
+ 775   2      
+ 776   2                delay(2000);
+ 777   2                LCD1602_wcmd(0x01);
+ 778   2                LCD1602_prints(0,0,"Friends together");
+ 779   2                LCD1602_prints(0,1,"for life...     ");
+ 780   2      
+ 781   2                delay(2000);
+ 782   2                LCD1602_wcmd(0x01);
+ 783   2                  mode=1 ;
+ 784   2                OK=0;
+ 785   2        }
+ 786   1      }
+ 787          void diy()
+ 788          {
+ 789   1        LCD1602_init();
+ 790   1        delay(1);
+ 791   1        LCD1602_prints(0,0," Digital Clock  ");
+ 792   1        LCD1602_prints(0,1,"v1.1.0  --by HJL");
+ 793   1        delay(1000);
+ 794   1        LCD1602_wcmd(0x01);             
+ 795   1      }
+ 796          
+ 797          
+ 798          
+C51 COMPILER V9.01   Òº¾§Ê±_Ó3                                                             04/08/2018 16:13:15 PAGE 14  
+
+ 799          void main()
+ 800          {
+ 801   1        IT0=1;          //Íâ²¿ÖÐ¶Ï0ÎªÏÂ½µÑØ´¥·¢
+ 802   1        EX0=1;          //
+ 803   1        TMOD=0x01;
+ 804   1        TH0=0x3C;                //50ms
+ 805   1        TL0=0xB0;
+ 806   1        EA=1;
+ 807   1        ET0=1;
+ 808   1        TR0=1;
+ 809   1      
+ 810   1        get_wendu();
+ 811   1      
+ 812   1        diy();
+ 813   1        chaongdiaon();
+ 814   1      
+ 815   1      
+ 816   1      
+ 817   1        while(1)
+ 818   1        {
+ 819   2          P1=0xff;
+ 820   2                keyscan();
+ 821   2              display();
+ 822   2        }
+ 823   1      }
+ 824          
+ 825          
+ 826          
+ 827          void timer0() interrupt 1
+ 828          {
+ 829   1        TH0=0x3C;
+ 830   1        TL0=0xB0;
+ 831   1        count++;
+ 832   1        if(count==10)
+ 833   1        {
+ 834   2              count=0;
+ 835   2              SHAN=~SHAN;
+ 836   2        }
+ 837   1      } 
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2872    ----
+   CONSTANT SIZE    =    264    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     48      13
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      4       4
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

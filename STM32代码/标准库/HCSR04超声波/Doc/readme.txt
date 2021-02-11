@@ -1,0 +1,5 @@
+HCSR_04
+GND-µÁ‘¥µÿ
+Echo-PA0
+Trig-PA1
+VCC-5V

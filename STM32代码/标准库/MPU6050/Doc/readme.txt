@@ -1,0 +1,6 @@
+MPU6050Òý½ÅÁ¬½Ó£º
+VCC   3.3V/5V
+GND   GND
+SCL   PA0
+SDA   PA1
+INT   PA2
