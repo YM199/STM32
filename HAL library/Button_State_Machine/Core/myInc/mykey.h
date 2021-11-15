@@ -58,8 +58,7 @@ typedef struct
 typedef enum
 {
 	KEY1,
-	KEY2,
-	KEY3,/*用户添加的按钮名称*/
+	KEY2,/*用户添加的按钮名称*/
 	KEY_NUM,/*必须要有的记录按钮数量，必须在最后*/
 }KEY_LIST;
 #endif  /*__MYKEY_H__*/

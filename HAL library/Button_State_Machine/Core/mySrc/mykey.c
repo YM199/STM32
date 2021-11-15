@@ -34,16 +34,40 @@ static void Create_Key (Key_Init* Init)
 	}
 }
 
+/**
+ * @brief  初始化按键
+ * @return NULL
+*/
+void KEY_Init(void)
+{
+	Key_Init KeyInit[KEY_NUM] = 
+	{
+		{GPIO_PULLDOWN, GPIOA, GPIO_PIN_0}, /*初始化按键KEY1*/
+		{GPIO_PULLDOWN, GPIOC, GPIO_PIN_13},/*初始化按键KEY2*/
+	};
+	Create_Key(KeyInit);/*调用按键初始化函数*/
+}
 
-//static void Get_Key_Level (void)
-//{	
-//	for (uint8_t i = 0; i < KEY_NUM; ++i)
-//	{
-//		if (Key_Buf[i].KeyStatus.KEY_SHIELD == DISABLE)
-//		{
-//			continue;/*该按键被挂起，不操作*/
-//		}
-//		
-//		if (Key_Buf[i].KeyStatus.READ_PIN(Key_Buf[i].Key_Board) == )
-//	}
-//}
+/**
+ * @brief  扫描按键
+ * @return NULL
+*/
+static void Get_Key_Level (void)
+{	
+	for (uint8_t i = 0; i < KEY_NUM; ++i)
+	{
+		if (Key_Buf[i].KeyStatus.KEY_SHIELD == DISABLE)
+		{
+			continue;/*该按键被挂起，不操作*/
+		}
+		
+		if (Key_Buf[i].KeyStatus.READ_PIN(Key_Buf[i].Key_Board) == Key_Buf[i].KeyStatus.KEY_DOWN_LEVEL)
+		{
+			Key_Buf[i].KeyStatus.KEY_FLAG = HIGH_LEVEL;/*置1，表示按键按下*/
+		}
+		else
+		{
+			Key_Buf[i].KeyStatus.KEY_FLAG = LOW_LEVEL;/*置0，表示按键未按下*/
+		}
+	}
+}
