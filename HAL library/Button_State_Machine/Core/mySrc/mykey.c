@@ -71,3 +71,79 @@ static void Get_Key_Level (void)
 		}
 	}
 }
+
+/**
+ * @brief  状态机的状态转换
+ * @return NULL
+*/
+static void ReadKeyStatus(void)
+{
+	Get_Key_Level();
+	for (uint8_t i = 0; i < KEY_NUM; ++i)
+	{
+		switch (Key_Buf[i].KeyStatus.KEY_STATUS)
+		{
+			case KEY_NULL:/*状态0：没有按键按下*/
+				if (Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL)/*有按键按下*/
+				{
+					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_SURE;/*转入状态1*/
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
+				}
+				else
+				{
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
+				}
+				break;
+			case KEY_SURE:/*状态1，按键按下确认*/
+				if (Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL)/*确认和上次相同*/
+				{
+					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_PRESS;/*转入状态2*/
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_PRESS; /*按下事件*/
+					Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清零，用来统计按了多久*/
+				}
+				else
+				{
+					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_NULL;/*转入状态0*/
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
+				}
+				break;
+			case KEY_PRESS:/*状态2，按键按下*/
+				if (Key_Buf[i].KeyStatus.KEY_FLAG != HIGH_LEVEL)/*按键释放*/
+				{
+					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_NULL;/*转入状态0*/
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_RAISE;/*松开事件*/
+				}
+				else if ((Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL) && (++Key_Buf[i].KeyStatus.KEY_TIMECOUNT >= KEY_LONG_DOWN_DELAY))/*超过KEY_LONG_DOWN_DELAY没有释放*/
+				{
+					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_LONG;/*转入状态3*/
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_LONG;/*长按事件*/
+					Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清零*/
+				}
+				else
+				{
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
+				}
+				break;
+			case KEY_LONG:/*状态3，按键连续按下*/
+				if (Key_Buf[i].KeyStatus.KEY_FLAG != HIGH_LEVEL)/*按键释放*/
+				{
+					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_NULL;/*转入状态0*/
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_RAISE;/*松开事件*/
+				}
+				else if ((Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL) && (++Key_Buf[i].KeyStatus.KEY_TIMECOUNT >= KEY_LONG_DOWN_DELAY))/*超过KEY_LONG_DOWN_DELAY没有释放*/
+				{
+					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_LONG;/*转入状态3*/
+					//Key_Buf[i].KeyStatus.KEY_EVENT = KEY_LONG;/*长按事件*/
+					Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清零*/
+				}
+				else
+				{
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
+				}
+				break;
+			default:
+				break;
+		}
+	}
+}
+

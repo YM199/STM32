@@ -25,7 +25,7 @@ typedef FunctionalState KEY_ENABLE_STATUS;
 
 /*按键IO读取标志*/
 #define LOW_LEVEL  GPIO_PIN_RESET
-#define HIGH_LEVEL GPIO_PIN_SET
+#define HIGH_LEVEL GPIO_PIN_SET/*----------改一下描述------------*/
 typedef GPIO_PinState IO_STATUS_LIST;
 
 /*读取IO电平的函数 函数指针  内敛函数?*/
