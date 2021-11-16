@@ -8,7 +8,7 @@ typedef struct{
 	uint32_t GPIO_Pull;		/*按键的上下拉模式*/
 	GPIO_TypeDef* GPIOx;	/*按键对应的端口*/
 	uint16_t GPIO_Pin_x;	/*按键的引脚*/
-	uint8_t key_index;
+	uint8_t key_index;    /*按键的索引*/
 }Key_Init;
 
 /* 按键状态机的五种状态 */
@@ -58,8 +58,8 @@ typedef struct
 /*按键注册表*/
 typedef enum
 {
-	KEY1,
-	KEY2,/*用户添加的按钮名称*/
+	KEY0,
+	KEY1,/*用户添加的按钮名称*/
 	KEY_NUM,/*必须要有的记录按钮数量，必须在最后*/
 }KEY_LIST;
 

@@ -1,6 +1,6 @@
 #include "mykey.h"
 Key_Config Key_Buf[KEY_NUM];/*创建按键数组*/
-#define KEY_LONG_DOWN_DELAY 20 /*设置20个TIM3定时器中断20*50 = 1s算长按*/
+#define KEY_LONG_DOWN_DELAY 20 /*设置20个TIM3定时器中断20*50ms = 1s算长按*/
 
 /**
  * @brief  初始化按键
@@ -42,8 +42,8 @@ void KEY_Init ( void )
 {
 	Key_Init KeyInit[KEY_NUM] = 
 	{
-		{GPIO_PULLDOWN, GPIOA, GPIO_PIN_0}, /*初始化按键KEY1*/
-		{GPIO_PULLDOWN, GPIOC, GPIO_PIN_13},/*初始化按键KEY2*/
+		{GPIO_PULLDOWN, GPIOA, GPIO_PIN_0}, /*初始化按键KEY0*/
+		{GPIO_PULLDOWN, GPIOC, GPIO_PIN_13},/*初始化按键KEY1*/
 	};
 	Create_Key(KeyInit);/*调用按键初始化函数*/
 }
