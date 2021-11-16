@@ -12,20 +12,20 @@ typedef struct{
 }Key_Init;
 
 /* 按键状态机的五种状态 */
-typedef enum _KEY_STATUS_LIST{
-	KEY_NULL  = 0x00, /* 无动作*/
-	KEY_SURE  = 0x01, /* 确认状态*/
-	KEY_RAISE = 0x02, /* 按键抬起*/
-	KEY_PRESS = 0x04, /* 按键按下*/
-	KEY_LONG  = 0x08, /* 长按*/
+typedef enum {
+	KEY_NULL = 0u,/* 无动作*/
+	KEY_SURE,      /* 确认状态*/
+	KEY_RAISE,     /* 按键抬起*/
+	KEY_PRESS,     /* 按键按下*/
+	KEY_LONG       /* 长按*/
 }KEY_STATUS_LIST;
 
 /*按键屏蔽标志*/
 typedef FunctionalState KEY_ENABLE_STATUS;
 
 /*按键IO读取标志*/
-#define LOW_LEVEL  GPIO_PIN_RESET
-#define HIGH_LEVEL GPIO_PIN_SET/*----------改一下描述------------*/
+#define NPress_Down  GPIO_PIN_RESET/*按键未按下*/
+#define Press_Down   GPIO_PIN_SET  /*按键按下*/
 typedef GPIO_PinState IO_STATUS_LIST;
 
 /*读取IO电平的函数 函数指针  内敛函数?*/
@@ -37,12 +37,13 @@ static IO_STATUS_LIST KEY_ReadPin(Key_Init Key)
 /*状态机类*/
 typedef struct __KEY_COMPONENTS
 {
-	KEY_ENABLE_STATUS KEY_SHIELD; /*按键屏蔽：DISABLE(0);屏蔽，ENABLE(1);不屏蔽*/
-	uint8_t KEY_TIMECOUNT;        /*按键长按计数*/
-	IO_STATUS_LIST KEY_FLAG;      /*是否按下的标志 1表示按下*/
-	IO_STATUS_LIST KEY_DOWN_LEVEL;/*按下时，按键IO实际的电平*/
-	KEY_STATUS_LIST KEY_STATUS;   /*按键状态*/
-	KEY_STATUS_LIST KEY_EVENT;    /*按键事件*/
+	KEY_ENABLE_STATUS KEY_SHIELD;      /*按键屏蔽：DISABLE(0);屏蔽，ENABLE(1);不屏蔽*/
+	uint8_t KEY_TIMECOUNT;             /*按键长按计数*/
+	IO_STATUS_LIST KEY_FLAG;           /*是否按下的标志 1表示按下*/
+	IO_STATUS_LIST KEY_DOWN_LEVEL;     /*按下时，按键IO实际的电平*/
+	KEY_STATUS_LIST KEY_CUR_STATUS;    /*按键CUR状态*/
+	KEY_STATUS_LIST KEY_NEXT_STATUS;   /*按键NEXT状态*/
+	KEY_STATUS_LIST KEY_EVENT;         /*按键事件*/
 	IO_STATUS_LIST (*READ_PIN) (Key_Init Key);/*读IO电平函数，这是一个函数指针*/
 }KEY_COMPONENTS;
 

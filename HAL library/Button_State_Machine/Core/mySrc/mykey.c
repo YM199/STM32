@@ -17,19 +17,19 @@ static void Create_Key (Key_Init* Init)
 		/*初始化按键的状态机*/
 		Key_Buf[i].KeyStatus.KEY_SHIELD = ENABLE;//不挂起当前按键
 		Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清0*/
-		Key_Buf[i].KeyStatus.KEY_FLAG = LOW_LEVEL;//按键未按下
+		Key_Buf[i].KeyStatus.KEY_FLAG = NPress_Down;//按键未按下
 		
 		if (Key_Buf[i].Key_Board.GPIO_Pull == GPIO_PULLUP)/*按键为上拉输入*/
 		{
-			Key_Buf[i].KeyStatus.KEY_DOWN_LEVEL = LOW_LEVEL;/*按键按下时为低电平*/
+			Key_Buf[i].KeyStatus.KEY_DOWN_LEVEL = NPress_Down;/*按键按下时为低电平*/
 		}
 		else
 		{
-			Key_Buf[i].KeyStatus.KEY_DOWN_LEVEL = HIGH_LEVEL;/*按键按下时为高电平*/
+			Key_Buf[i].KeyStatus.KEY_DOWN_LEVEL = Press_Down;/*按键按下时为高电平*/
 		}
 		
-		Key_Buf[i].KeyStatus.KEY_STATUS = KEY_NULL;/*按键状态为无动作*/
-		Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*---------------------*/
+		Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_NULL;/*按键NEXT状态为无动作*/
+		Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*事件初始化为KEY_NULL*/
 		Key_Buf[i].KeyStatus.READ_PIN = KEY_ReadPin;/*赋值按键读取函数*/
 	}
 }
@@ -63,11 +63,11 @@ static void Get_Key_Level (void)
 		
 		if (Key_Buf[i].KeyStatus.READ_PIN(Key_Buf[i].Key_Board) == Key_Buf[i].KeyStatus.KEY_DOWN_LEVEL)
 		{
-			Key_Buf[i].KeyStatus.KEY_FLAG = HIGH_LEVEL;/*置1，表示按键按下*/
+			Key_Buf[i].KeyStatus.KEY_FLAG = Press_Down;/*置1，表示按键按下*/
 		}
 		else
 		{
-			Key_Buf[i].KeyStatus.KEY_FLAG = LOW_LEVEL;/*置0，表示按键未按下*/
+			Key_Buf[i].KeyStatus.KEY_FLAG = NPress_Down;/*置0，表示按键未按下*/
 		}
 	}
 }
@@ -79,15 +79,16 @@ static void Get_Key_Level (void)
 static void ReadKeyStatus ( void )
 {
 	Get_Key_Level ();
-
+  
 	for ( uint8_t i = 0; i < KEY_NUM; ++i )
 	{
-		switch ( Key_Buf[i].KeyStatus.KEY_STATUS )
+		Key_Buf[i].KeyStatus.KEY_CUR_STATUS = Key_Buf[i].KeyStatus.KEY_NEXT_STATUS;
+		switch ( Key_Buf[i].KeyStatus.KEY_CUR_STATUS )
 		{
 			case KEY_NULL:/*状态0：没有按键按下*/
-				if ( Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL )/*有按键按下*/
+				if ( Key_Buf[i].KeyStatus.KEY_FLAG == Press_Down )/*有按键按下*/
 				{
-					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_SURE;/*转入状态1*/
+					Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_SURE;/*转入状态1*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
 				}
 				else
@@ -96,27 +97,27 @@ static void ReadKeyStatus ( void )
 				}
 				break;
 			case KEY_SURE:/*状态1，按键按下确认*/
-				if ( Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL )/*确认和上次相同*/
+				if ( Key_Buf[i].KeyStatus.KEY_FLAG == Press_Down )/*确认和上次相同*/
 				{
-					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_PRESS;/*转入状态2*/
+					Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_PRESS;/*转入状态2*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_PRESS; /*按下事件*/
 					Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清零，用来统计按了多久*/
 				}
 				else
 				{
-					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_NULL;/*转入状态0*/
+					Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_NULL;/*转入状态0*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
 				}
 				break;
 			case KEY_PRESS:/*状态2，按键按下*/
-				if (Key_Buf[i].KeyStatus.KEY_FLAG != HIGH_LEVEL)/*按键释放*/
+				if (Key_Buf[i].KeyStatus.KEY_FLAG != Press_Down)/*按键释放*/
 				{
-					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_NULL;/*转入状态0*/
+					Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_NULL;/*转入状态0*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_RAISE;/*松开事件*/
 				}
-				else if ((Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL) && (++Key_Buf[i].KeyStatus.KEY_TIMECOUNT >= KEY_LONG_DOWN_DELAY))/*超过KEY_LONG_DOWN_DELAY没有释放*/
+				else if ((Key_Buf[i].KeyStatus.KEY_FLAG == Press_Down) && (++Key_Buf[i].KeyStatus.KEY_TIMECOUNT >= KEY_LONG_DOWN_DELAY))/*超过KEY_LONG_DOWN_DELAY没有释放*/
 				{
-					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_LONG;/*转入状态3*/
+					Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_LONG;/*转入状态3*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_LONG;/*长按事件*/
 					Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清零*/
 				}
@@ -126,15 +127,15 @@ static void ReadKeyStatus ( void )
 				}
 				break;
 			case KEY_LONG:/*状态3，按键连续按下*/
-				if (Key_Buf[i].KeyStatus.KEY_FLAG != HIGH_LEVEL)/*按键释放*/
+				if (Key_Buf[i].KeyStatus.KEY_FLAG != Press_Down)/*按键释放*/
 				{
-					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_NULL;/*转入状态0*/
+					Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_NULL;/*转入状态0*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_RAISE;/*松开事件*/
 				}
-				else if ((Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL) && (++Key_Buf[i].KeyStatus.KEY_TIMECOUNT >= KEY_LONG_DOWN_DELAY))/*超过KEY_LONG_DOWN_DELAY没有释放*/
+				else if ((Key_Buf[i].KeyStatus.KEY_FLAG == Press_Down) && (++Key_Buf[i].KeyStatus.KEY_TIMECOUNT >= KEY_LONG_DOWN_DELAY))/*超过KEY_LONG_DOWN_DELAY没有释放*/
 				{
-					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_LONG;/*转入状态3*/
-					//Key_Buf[i].KeyStatus.KEY_EVENT = KEY_LONG;/*长按事件*/
+					Key_Buf[i].KeyStatus.KEY_NEXT_STATUS = KEY_LONG;/*转入状态3*/
+					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_LONG;/*长按事件*/
 					Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清零*/
 				}
 				else
