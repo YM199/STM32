@@ -2,7 +2,7 @@
 #define __MYKEY_H__
 
 #include "main.h"
-
+#include "tim.h"
 /* 用于状态机初始化按键 */
 typedef struct{
 	uint32_t GPIO_Pull;		/*按键的上下拉模式*/
@@ -61,5 +61,8 @@ typedef enum
 	KEY2,/*用户添加的按钮名称*/
 	KEY_NUM,/*必须要有的记录按钮数量，必须在最后*/
 }KEY_LIST;
+
+void KEY_Init ( void );
+void Key_CallBack ( void );
 #endif  /*__MYKEY_H__*/
 

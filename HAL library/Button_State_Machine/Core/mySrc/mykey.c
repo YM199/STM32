@@ -12,7 +12,7 @@ static void Create_Key (Key_Init* Init)
 	for (uint8_t i = 0; i < KEY_NUM; ++i)
 	{
 		Key_Buf[i].Key_Board = Init[i];   /*初始化按键对象的属性*/
-		Key_Buf[i].Key_Board.key_nox = i; /*初始化按键的索引，记得改下变量名*/
+		Key_Buf[i].Key_Board.key_nox = i; /*初始化按键的索引，------------记得改下变量名*/
 		
 		/*初始化按键的状态机*/
 		Key_Buf[i].KeyStatus.KEY_SHIELD = ENABLE;//不挂起当前按键
@@ -38,7 +38,7 @@ static void Create_Key (Key_Init* Init)
  * @brief  初始化按键
  * @return NULL
 */
-void KEY_Init(void)
+void KEY_Init ( void )
 {
 	Key_Init KeyInit[KEY_NUM] = 
 	{
@@ -76,15 +76,16 @@ static void Get_Key_Level (void)
  * @brief  状态机的状态转换
  * @return NULL
 */
-static void ReadKeyStatus(void)
+static void ReadKeyStatus ( void )
 {
-	Get_Key_Level();
-	for (uint8_t i = 0; i < KEY_NUM; ++i)
+	Get_Key_Level ();
+
+	for ( uint8_t i = 0; i < KEY_NUM; ++i )
 	{
-		switch (Key_Buf[i].KeyStatus.KEY_STATUS)
+		switch ( Key_Buf[i].KeyStatus.KEY_STATUS )
 		{
 			case KEY_NULL:/*状态0：没有按键按下*/
-				if (Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL)/*有按键按下*/
+				if ( Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL )/*有按键按下*/
 				{
 					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_SURE;/*转入状态1*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_NULL;/*空事件*/
@@ -95,7 +96,7 @@ static void ReadKeyStatus(void)
 				}
 				break;
 			case KEY_SURE:/*状态1，按键按下确认*/
-				if (Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL)/*确认和上次相同*/
+				if ( Key_Buf[i].KeyStatus.KEY_FLAG == HIGH_LEVEL )/*确认和上次相同*/
 				{
 					Key_Buf[i].KeyStatus.KEY_STATUS = KEY_PRESS;/*转入状态2*/
 					Key_Buf[i].KeyStatus.KEY_EVENT = KEY_PRESS; /*按下事件*/
@@ -144,6 +145,94 @@ static void ReadKeyStatus(void)
 			default:
 				break;
 		}
+	}
+}
+
+/**
+ * @brief  根据Key_Init进行回调
+ * @see    根据按键数目修改case 0~x
+ * @return NULL
+*/
+__weak void Key_EventCallBack ( Key_Config key_config )
+{
+	//printf ( "nox = %d\r\n", key_config.Key_Board.key_nox );/*********nox*********/
+	switch ( key_config.Key_Board.key_nox )
+	{
+		case 0:
+		{
+			switch (key_config.KeyStatus.KEY_EVENT)
+			{
+				case KEY_NULL:/*没有按下的操作*/
+				{
+					//printf ( "KEY_NULL\r\n" );
+				}break;
+				
+				case KEY_SURE:/*确认按下的操作*/
+				{
+					printf ( "KEY_SURE\r\n" );
+				}break;
+				
+				case KEY_RAISE:/*按键抬起操作*/
+				{
+					printf ( "KEY_RAISE\r\n" );
+				}break;
+
+				case KEY_PRESS:/*按键按下操作*/
+				{
+					printf ( "KEY_PRESS\r\n" );
+				}break;
+
+				case KEY_LONG:/*按键长按的操作*/
+				{
+					printf ( "KEY_LONG\r\n" );
+				}break;
+			}
+		}break;
+		
+		case 1:
+		{
+			switch (key_config.KeyStatus.KEY_EVENT)
+			{
+				case KEY_NULL:/*没有按下的操作*/
+				{
+					//printf ( "KEY_NULL\r\n" );
+				}break;
+				
+				case KEY_SURE:/*确认按下的操作*/
+				{
+					printf ( "KEY_SURE\r\n" );
+				}break;
+				
+				case KEY_RAISE:/*按键抬起操作*/
+				{
+					printf ( "KEY_RAISE\r\n" );
+				}break;
+
+				case KEY_PRESS:/*按键按下操作*/
+				{
+					printf ( "KEY_PRESS\r\n" );
+				}break;
+
+				case KEY_LONG:/*按键长按的操作*/
+				{
+					printf ( "KEY_LONG\r\n" );
+				}break;
+			}break;			
+		}		
+	}
+}
+
+/**
+ * @brief  置于定时器中的回调函数
+ * @return NULL
+*/
+void Key_CallBack ( void )
+{
+	ReadKeyStatus();
+	for ( int i = 0; i < KEY_NUM; ++i )
+	{
+		/*对相应的时间产生的动作*/
+		Key_EventCallBack(Key_Buf[i]);
 	}
 }
 
