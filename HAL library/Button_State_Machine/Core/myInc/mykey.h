@@ -8,7 +8,7 @@ typedef struct{
 	uint32_t GPIO_Pull;		/*按键的上下拉模式*/
 	GPIO_TypeDef* GPIOx;	/*按键对应的端口*/
 	uint16_t GPIO_Pin_x;	/*按键的引脚*/
-	uint8_t key_nox;
+	uint8_t key_index;
 }Key_Init;
 
 /* 按键状态机的五种状态 */

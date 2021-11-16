@@ -12,11 +12,11 @@ static void Create_Key (Key_Init* Init)
 	for (uint8_t i = 0; i < KEY_NUM; ++i)
 	{
 		Key_Buf[i].Key_Board = Init[i];   /*初始化按键对象的属性*/
-		Key_Buf[i].Key_Board.key_nox = i; /*初始化按键的索引，------------记得改下变量名*/
+		Key_Buf[i].Key_Board.key_index = i; /*初始化按键的索引*/
 		
 		/*初始化按键的状态机*/
 		Key_Buf[i].KeyStatus.KEY_SHIELD = ENABLE;//不挂起当前按键
-		Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*---------------------*/
+		Key_Buf[i].KeyStatus.KEY_TIMECOUNT = 0;/*计数器清0*/
 		Key_Buf[i].KeyStatus.KEY_FLAG = LOW_LEVEL;//按键未按下
 		
 		if (Key_Buf[i].Key_Board.GPIO_Pull == GPIO_PULLUP)/*按键为上拉输入*/
@@ -155,8 +155,8 @@ static void ReadKeyStatus ( void )
 */
 __weak void Key_EventCallBack ( Key_Config key_config )
 {
-	//printf ( "nox = %d\r\n", key_config.Key_Board.key_nox );/*********nox*********/
-	switch ( key_config.Key_Board.key_nox )
+	//printf ( "nox = %d\r\n", key_config.Key_Board.key_index );/*********nox*********/
+	switch ( key_config.Key_Board.key_index )
 	{
 		case 0:
 		{
