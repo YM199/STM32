@@ -56,3 +56,19 @@ typedef enum
 # BUG
 
 无法在定时器中断里面发送任务通知，一发送就死机，按键中断可以。
+
+2021/11/18修复bug
+
+**原因**：提前调用`HAL_TIM_Base_Start_IT(&htim1);` 打开了定时器，导致进入中断的时候任务还没开始初始化，传入`vTaskNotifyGiveFromISR`的任务句柄为空，进入断言函数导致大于等于BASEPRI的中断被屏蔽（包括了定时器中断）。
+
+**解决办法**：在任务初始化之后打开定时器：
+
+```C
+  /* Init scheduler */
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+  HAL_TIM_Base_Start_IT(&htim1);
+  /* Start scheduler */
+```
+
+**缺点**：在不合适的地方添加了自定义代码，如果使用STM32Cubemx重新生成了代码，`HAL_TIM_Base_Start_IT(&htim1);`需要重新添加到指定位置。

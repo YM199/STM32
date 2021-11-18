@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "mykey.h"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern osThreadId_t Task1Handle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -118,14 +119,12 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 	KEY_Init();
-	HAL_TIM_Base_Start_IT(&htim1);
-	
-	printf("按键状态机实验\r\n");
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
+	HAL_TIM_Base_Start_IT(&htim1);
   /* Start scheduler */
   osKernelStart();
 
@@ -201,7 +200,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
 	if(htim->Instance == TIM1)
 	{
-		Key_CallBack ();
+		BaseType_t xHigherPriorityTaskWoken;
+		vTaskNotifyGiveFromISR( Task1Handle, &xHigherPriorityTaskWoken );
+	  portYIELD_FROM_ISR ( xHigherPriorityTaskWoken );
+		
 	}
   /* USER CODE END Callback 1 */
 }
