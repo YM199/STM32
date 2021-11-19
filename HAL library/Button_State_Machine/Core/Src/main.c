@@ -119,12 +119,13 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 	KEY_Init();
+	HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
-	HAL_TIM_Base_Start_IT(&htim1);
+	
   /* Start scheduler */
   osKernelStart();
 
@@ -200,10 +201,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
 	if(htim->Instance == TIM1)
 	{
-		BaseType_t xHigherPriorityTaskWoken;
-		vTaskNotifyGiveFromISR( Task1Handle, &xHigherPriorityTaskWoken );
-	  portYIELD_FROM_ISR ( xHigherPriorityTaskWoken );
-		
+		if ( Task1Handle != NULL )
+		{
+		  BaseType_t xHigherPriorityTaskWoken;
+		  vTaskNotifyGiveFromISR( Task1Handle, &xHigherPriorityTaskWoken );
+	    portYIELD_FROM_ISR ( xHigherPriorityTaskWoken );			
+		}
 	}
   /* USER CODE END Callback 1 */
 }

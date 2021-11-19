@@ -49,7 +49,7 @@
 
 /* USER CODE END Variables */
 /* Definitions for Task1 */
-osThreadId_t Task1Handle;
+osThreadId_t Task1Handle = NULL;
 const osThreadAttr_t Task1_attributes = {
   .name = "Task1",
   .stack_size = 128 * 4,
