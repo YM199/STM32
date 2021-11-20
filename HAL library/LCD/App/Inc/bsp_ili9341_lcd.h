@@ -3,7 +3,7 @@
 
 
 #include "main.h"
-#include "fonts.h"
+
 
 
 /***************************************************************************************
@@ -85,24 +85,11 @@ void ILI9341_BackLed_Control ( FunctionalState enumState );
 void ILI9341_GramScan ( uint8_t ucOtion );
 void ILI9341_OpenWindow ( uint16_t usX, uint16_t usY, uint16_t usWidth, uint16_t usHeight );
 void ILI9341_Clear ( uint16_t usX, uint16_t usY, uint16_t usWidth, uint16_t usHeight );
-void ILI9341_SetPointPixel ( uint16_t usX, uint16_t usY );
-uint16_t ILI9341_GetPointPixel ( uint16_t usX , uint16_t usY );
-void ILI9341_DrawLine ( uint16_t usX1, uint16_t usY1, uint16_t usX2, uint16_t usY2 );
-void ILI9341_DrawRectangle ( uint16_t usX_Start, uint16_t usY_Start, uint16_t usWidth, uint16_t usHeight,uint8_t ucFilled );
-void ILI9341_DrawCircle ( uint16_t usX_Center, uint16_t usY_Center, uint16_t usRadius, uint8_t ucFilled );
-void ILI9341_DispChar_EN ( uint16_t usX, uint16_t usY, const char cChar );
-void ILI9341_DispStringLine_EN ( uint16_t line, char * pStr );
-void ILI9341_DispString_EN ( uint16_t usX, uint16_t usY, char * pStr );
-void ILI9341_DispString_EN_YDir (   uint16_t usX,uint16_t usY ,  char * pStr );
+void LCD_Color_Fill ( uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t * color_p );	
 
-void LCD_SetFont ( sFONT *fonts );
-sFONT *LCD_GetFont (void);
-void LCD_ClearLine (uint16_t Line);
-void LCD_SetBackColor	(uint16_t Color);
-void LCD_SetTextColor	(uint16_t Color)	;
-void LCD_SetColors (uint16_t TextColor, uint16_t BackColor);
-void LCD_GetColors (uint16_t *TextColor, uint16_t *BackColor);
-void LCD_Test(void);
+
+
+
 /* 直接操作寄存器的方法控制IO */
 #define	digitalH(p,i)			{p->BSRR=i;}			  //设置为高电平		
 #define digitalL(p,i)			{p->BSRR=(uint32_t)i << 16;}				//输出低电平

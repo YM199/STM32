@@ -118,7 +118,7 @@ void StartTask1(void *argument)
   /* Infinite loop */
   for(;;)
   {
-		LCD_Test();
+		
     osDelay(1);
   }
   /* USER CODE END StartTask1 */
