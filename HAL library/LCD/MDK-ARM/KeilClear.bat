@@ -47,4 +47,7 @@ del *.sct /s
 
 del *.map /s
 
+del *.hex /s
+
+del *.dbgconf /s
 exit
