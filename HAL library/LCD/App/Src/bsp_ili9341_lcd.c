@@ -37,21 +37,13 @@ static sFONT *LCD_Currentfonts = &Font8x16;  //英文字体
 static uint16_t CurrentTextColor   = BLACK;//前景色
 static uint16_t CurrentBackColor   = WHITE;//背景色
 
-__inline void                 ILI9341_Write_Cmd           ( uint16_t usCmd );
-__inline void                 ILI9341_Write_Data          ( uint16_t usData );
-__inline uint16_t             ILI9341_Read_Data           ( void );
-static void                   ILI9341_Delay               ( __IO uint32_t nCount );
-static void                   ILI9341_REG_Config          ( void );
-static void                   ILI9341_SetCursor           ( uint16_t usX, uint16_t usY );
-static __inline void          ILI9341_FillColor           ( uint32_t ulAmout_Point, uint16_t usColor );
-static uint16_t               ILI9341_Read_PixelData      ( void );
 
 /**
   * @brief  向ILI9341写入命令
   * @param  usCmd :要写入的命令（表寄存器地址）
   * @retval 无
   */	
- void ILI9341_Write_Cmd ( uint16_t usCmd )
+__INLINE void ILI9341_Write_Cmd ( uint16_t usCmd )
 {
 	* ( __IO uint16_t * ) ( FSMC_Addr_ILI9341_CMD ) = usCmd;
 	
@@ -63,7 +55,7 @@ static uint16_t               ILI9341_Read_PixelData      ( void );
   * @param  usData :要写入的数据
   * @retval 无
   */	
- void ILI9341_Write_Data ( uint16_t usData )
+__INLINE void ILI9341_Write_Data ( uint16_t usData )
 {
 	* ( __IO uint16_t * ) ( FSMC_Addr_ILI9341_DATA ) = usData;
 	
@@ -75,7 +67,7 @@ static uint16_t               ILI9341_Read_PixelData      ( void );
   * @param  无
   * @retval 读取到的数据
   */	
- uint16_t ILI9341_Read_Data ( void )
+__INLINE uint16_t ILI9341_Read_Data ( void )
 {
 	return ( * ( __IO uint16_t * ) ( FSMC_Addr_ILI9341_DATA ) );
 	
@@ -659,7 +651,7 @@ static void ILI9341_SetCursor ( uint16_t usX, uint16_t usY )
  * @param  usColor ：颜色
  * @retval 无
  */
-static __inline void ILI9341_FillColor ( uint32_t ulAmout_Point, uint16_t usColor )
+void ILI9341_FillColor ( uint32_t ulAmout_Point, uint16_t usColor )
 {
 	uint32_t i = 0;
 	
@@ -669,8 +661,6 @@ static __inline void ILI9341_FillColor ( uint32_t ulAmout_Point, uint16_t usColo
 		
 	for ( i = 0; i < ulAmout_Point; i ++ )
 		ILI9341_Write_Data ( usColor );
-		
-	
 }
 
 
