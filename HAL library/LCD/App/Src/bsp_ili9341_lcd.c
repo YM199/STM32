@@ -446,36 +446,16 @@ void ILI9341_OpenWindow ( uint16_t usX, uint16_t usY, uint16_t usWidth, uint16_t
 }
 
 
-
-
 /**
- * @brief  将显存区域内的像素数据点，依次填充到以(x1,y1)为起点， (x2,y2)为重点的对角矩形区域内。
- * @param  x1,y1 起点
- * @param  x2,y2 终点
- * @param  color_p 像素点数据
+ * @brief  设定ILI9341的光标坐标
+ * @param  usX ：在特定扫描方向下光标的X坐标
+ * @param  usY ：在特定扫描方向下光标的Y坐标
  * @retval 无
  */
-void LCD_Color_Fill ( uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t * color_p )	
-{	
-	int x,y;
-	x = x2 - x1;
-	y = y2 - y1;
-	ILI9341_OpenWindow ( x1, y1, x, y );
-
-	uint32_t i = 0;
-	
-	
-	/* memory write */
-	ILI9341_Write_Cmd ( CMD_SetPixel );	
-		
-	for ( i = 0; i < 1000; i ++ )
-	{
-		ILI9341_Write_Data ( *color_p );
-		color_p++;
-	}
+static void ILI9341_SetCursor ( uint16_t usX, uint16_t usY )	
+{
+	ILI9341_OpenWindow ( usX, usY, 1, 1 );
 }
-
-
 
 
 /**
@@ -484,17 +464,29 @@ void LCD_Color_Fill ( uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16
  * @param  usColor ：颜色
  * @retval 无
  */
-//void ILI9341_FillColor ( uint32_t ulAmout_Point, uint16_t usColor )
-//{
-//	uint32_t i = 0;
-//	
-//	
-//	/* memory write */
-//	ILI9341_Write_Cmd ( CMD_SetPixel );	
-//		
-//	for ( i = 0; i < ulAmout_Point; i ++ )
-//		ILI9341_Write_Data ( usColor );
-//}
+static __inline void ILI9341_FillColor ( uint32_t ulAmout_Point, uint16_t usColor )
+{
+	uint32_t i = 0;
+	
+	
+	/* memory write */
+	ILI9341_Write_Cmd ( CMD_SetPixel );	
+		
+	for ( i = 0; i < ulAmout_Point; i ++ )
+		ILI9341_Write_Data ( usColor );
+		
+	
+}
+
+void ILI9341_DrawPixel(uint16_t usX, uint16_t usY,uint16_t color)
+{
+    if ((usX < LCD_X_LENGTH) && (usY < LCD_Y_LENGTH))
+    {
+        ILI9341_SetCursor (usX,usY);
+
+        ILI9341_FillColor (1,color);
+    }
+}
 
 
 

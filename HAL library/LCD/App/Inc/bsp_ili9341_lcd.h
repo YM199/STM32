@@ -85,8 +85,8 @@ void ILI9341_BackLed_Control ( FunctionalState enumState );
 void ILI9341_GramScan ( uint8_t ucOtion );
 void ILI9341_OpenWindow ( uint16_t usX, uint16_t usY, uint16_t usWidth, uint16_t usHeight );
 void ILI9341_Clear ( uint16_t usX, uint16_t usY, uint16_t usWidth, uint16_t usHeight );
-void LCD_Color_Fill ( uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t * color_p );	
 
+void ILI9341_DrawPixel(uint16_t usX, uint16_t usY,uint16_t color);
 
 
 

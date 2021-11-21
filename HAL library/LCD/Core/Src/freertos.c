@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bsp_ili9341_lcd.h"
+#include "lvgl.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -118,8 +119,7 @@ void StartTask1(void *argument)
   /* Infinite loop */
   for(;;)
   {
-		
-    osDelay(1);
+		lv_task_handler();
   }
   /* USER CODE END StartTask1 */
 }
