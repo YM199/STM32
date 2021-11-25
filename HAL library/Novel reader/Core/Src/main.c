@@ -26,11 +26,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "bsp_ili9341_lcd.h"
 #include <stdio.h>
-#include "lvgl.h"
 #include "lv_port_disp.h"
-#include "lv_examples.h"
+#include "lvgl.h"
+#include "../../GUI/lvgl_app/lv_demos/lv_demo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -122,11 +121,9 @@ int main(void)
   MX_FSMC_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	
-	ILI9341_Init();
 	lv_init();
 	lv_port_disp_init();
-	lv_demo_widgets();
+	lv_demo_keypad_encoder();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -205,7 +202,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM8) {
     HAL_IncTick();
 		lv_tick_inc(1);
-		
   }
   /* USER CODE BEGIN Callback 1 */
 

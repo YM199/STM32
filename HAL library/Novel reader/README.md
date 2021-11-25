@@ -1,5 +1,7 @@
 # 注意事项：
 
+LCD配置中
+
 ```C
   Timing.AddressSetupTime = 1;
   Timing.AddressHoldTime = 15;
@@ -11,3 +13,7 @@
 
 
 要设置keil的优化等级为1
+
+
+
+LVGL版本：v8.1.0

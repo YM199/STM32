@@ -26,7 +26,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "bsp_ili9341_lcd.h"
 #include "lvgl.h"
 /* USER CODE END Includes */
 
@@ -120,6 +119,7 @@ void StartTask1(void *argument)
   for(;;)
   {
 		lv_task_handler();
+		osDelay(5);
   }
   /* USER CODE END StartTask1 */
 }

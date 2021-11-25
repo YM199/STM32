@@ -464,7 +464,7 @@ static void ILI9341_SetCursor ( uint16_t usX, uint16_t usY )
  * @param  usColor £ºÑÕÉ«
  * @retval ÎÞ
  */
-static __inline void ILI9341_FillColor ( uint32_t ulAmout_Point, uint16_t usColor )
+static  void ILI9341_FillColor ( uint32_t ulAmout_Point, uint16_t usColor )
 {
 	uint32_t i = 0;
 	
