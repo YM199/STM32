@@ -30,6 +30,7 @@
 #include "lv_port_disp.h"
 #include "lvgl.h"
 #include "../../GUI/lvgl_app/lv_demos/lv_demo.h"
+#include "../../GUI/lvgl/examples/lv_examples.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -123,7 +124,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	lv_init();
 	lv_port_disp_init();
-	lv_demo_keypad_encoder();
+	lv_example_anim_2();
   /* USER CODE END 2 */
 
   /* Init scheduler */

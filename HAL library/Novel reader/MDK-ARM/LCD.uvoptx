@@ -157,6 +157,22 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
+          <LineNumber>127</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>../Core/Src/main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
           <LineNumber>126</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
@@ -2390,6 +2406,18 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\GUI\lvgl_app\lv_demos\src\lv_demo_keypad_encoder\lv_demo_keypad_encoder.c</PathWithFileName>
       <FilenameWithoutPath>lv_demo_keypad_encoder.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>9</GroupNumber>
+      <FileNumber>176</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\GUI\lvgl\examples\anim\lv_example_anim_2.c</PathWithFileName>
+      <FilenameWithoutPath>lv_example_anim_2.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

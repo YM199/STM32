@@ -2915,6 +2915,11 @@
               <FileType>1</FileType>
               <FilePath>..\GUI\lvgl_app\lv_demos\src\lv_demo_keypad_encoder\lv_demo_keypad_encoder.c</FilePath>
             </File>
+            <File>
+              <FileName>lv_example_anim_2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GUI\lvgl\examples\anim\lv_example_anim_2.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
