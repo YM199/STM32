@@ -32,7 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -58,8 +58,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define XPT2046_SPI_MOSI_Pin GPIO_PIN_2
+#define XPT2046_SPI_MOSI_GPIO_Port GPIOE
+#define XPT2046_SPI_MISO_Pin GPIO_PIN_3
+#define XPT2046_SPI_MISO_GPIO_Port GPIOE
+#define XPT2046_PENIRQ_Pin GPIO_PIN_4
+#define XPT2046_PENIRQ_GPIO_Port GPIOE
 #define LCD_BL_Pin GPIO_PIN_12
 #define LCD_BL_GPIO_Port GPIOD
+#define XPT2046_SPI_CS_Pin GPIO_PIN_13
+#define XPT2046_SPI_CS_GPIO_Port GPIOD
+#define XPT2046_SPI_CLK_Pin GPIO_PIN_0
+#define XPT2046_SPI_CLK_GPIO_Port GPIOE
 #define LCD_RST_Pin GPIO_PIN_1
 #define LCD_RST_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */

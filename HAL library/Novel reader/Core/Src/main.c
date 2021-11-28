@@ -28,8 +28,10 @@
 #include <stdio.h>
 #include "lv_port_disp.h"
 #include "lvgl.h"
+#include "lv_port_indev.h"
 #include "../../GUI/lvgl_app/lv_demos/lv_demo.h"
 #include "../../GUI/lvgl/examples/lv_examples.h"
+#include "xpt2046_lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -122,7 +124,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	lv_init();
 	lv_port_disp_init();
-	lv_example_anim_2();
+	lv_port_indev_init();
+
+	lv_demo_keypad_encoder();
+	
+	//lv_example_anim_2();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -130,8 +136,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		lv_task_handler();
+
     /* USER CODE BEGIN 3 */
+		lv_task_handler();
+//		XPT2046_TouchEvenHandler();
   }
   /* USER CODE END 3 */
 }
